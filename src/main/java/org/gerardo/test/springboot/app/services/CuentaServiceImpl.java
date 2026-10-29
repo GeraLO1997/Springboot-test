@@ -5,10 +5,12 @@ import org.gerardo.test.springboot.app.models.Banco;
 import org.gerardo.test.springboot.app.models.Cuenta;
 import org.gerardo.test.springboot.app.repositories.BancoRepository;
 import org.gerardo.test.springboot.app.repositories.CuentaRepository;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @AllArgsConstructor
+@Service
 public class CuentaServiceImpl implements CuentaService{
 
     private CuentaRepository cuentaRepository;
