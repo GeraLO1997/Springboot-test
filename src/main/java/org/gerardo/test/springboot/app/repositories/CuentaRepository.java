@@ -9,11 +9,11 @@ import java.util.Optional;
 
 public interface CuentaRepository extends JpaRepository<Cuenta, Long> {
 
-    Cuenta findByPersona(String persona);
+//    Cuenta findByPersona(String persona);
 
     // otra forma - personalizado
     @Query("select c from Cuenta c where c.persona=?1")
-    Optional<Cuenta> buscarPorPersona(String persona);
+    Optional<Cuenta> findByPersona(String persona);
 
 
 }
