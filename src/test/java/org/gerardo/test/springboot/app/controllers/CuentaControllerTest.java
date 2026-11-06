@@ -3,6 +3,7 @@ package org.gerardo.test.springboot.app.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.gerardo.test.springboot.app.Datos;
+import org.gerardo.test.springboot.app.models.Cuenta;
 import org.gerardo.test.springboot.app.models.TransaccionDto;
 import org.gerardo.test.springboot.app.services.CuentaService;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,9 +16,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*; // agregamos todos, status, content
@@ -88,5 +92,26 @@ class CuentaControllerTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(response)));
 
 
+    }
+
+    @Test
+    void testListar() throws Exception {
+        //given
+        List<Cuenta> cuentas = Arrays.asList(Datos.crearCuenta001().orElseThrow(),
+                Datos.crearCuenta002().orElseThrow());
+        when(cuentaService.findAll()).thenReturn(cuentas);
+
+        //when
+        mvc.perform(get("/api/cuentas").contentType(MediaType.APPLICATION_JSON))
+                // then
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                // probamos los datos
+                .andExpect(jsonPath("$[0].persona").value("Andres"))
+                .andExpect(jsonPath("$[1].persona").value("Jhon"))
+                .andExpect(jsonPath("$[0].saldo").value("1000"))
+                .andExpect(jsonPath("$[1].saldo").value("2000"))
+                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(content().json(objectMapper.writeValueAsString(cuentas)));
     }
 }
