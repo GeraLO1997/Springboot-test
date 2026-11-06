@@ -20,7 +20,7 @@ public class CuentaServiceImpl implements CuentaService{
 
     @Override
     public List<Cuenta> findAll() {
-        return List.of();
+        return cuentaRepository.findAll();
     }
 
     @Transactional(readOnly = true)
