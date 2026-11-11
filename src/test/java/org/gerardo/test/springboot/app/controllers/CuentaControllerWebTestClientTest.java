@@ -3,10 +3,9 @@ package org.gerardo.test.springboot.app.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.gerardo.test.springboot.app.models.Cuenta;
 import org.gerardo.test.springboot.app.models.TransaccionDto;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -22,6 +21,7 @@ import java.util.Map;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class CuentaControllerWebTestClientTest {
 
@@ -42,6 +42,7 @@ class CuentaControllerWebTestClientTest {
     }
 
     @Test
+    @Order(1)
     void testTransferir() throws JsonProcessingException {
 
         // given
@@ -78,6 +79,7 @@ class CuentaControllerWebTestClientTest {
     }
 
     @Test
+    @Order(4)
     void testTransferirConConsume() throws JsonProcessingException {
 
         // given
@@ -119,5 +121,34 @@ class CuentaControllerWebTestClientTest {
 
                 });
 
+    }
+
+    @Test
+    @Order(2)
+    void testDetalle() throws JsonProcessingException { // este es probable que falle por que depende del orden que se ejecute
+
+        Cuenta cuenta = new Cuenta(1L, "Andres", new BigDecimal("900")); // esperamos recibir exactamente este objeto
+
+        client.get().uri("/api/cuentas/1").exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.persona").isEqualTo("Andres")
+                .jsonPath("$.saldo").isEqualTo(900)
+                .json(objectMapper.writeValueAsString(cuenta));
+    }
+
+    @Test
+    @Order(3)
+    void testDetalle2(){
+        client.get().uri("/api/cuentas/2").exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Cuenta.class)
+                .consumeWith(response -> {
+                    Cuenta cuenta = response.getResponseBody();
+                    Assertions.assertEquals("Jhon",cuenta.getPersona());
+                    Assertions.assertEquals("2100.00",cuenta.getSaldo().toPlainString());
+                });
     }
 }
